@@ -1,0 +1,144 @@
+{
+  "chaoslib-version": "1.39.0",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "node": "LAPTOP-ORSADFQE",
+  "experiment": {
+    "version": "1.0.0",
+    "title": "My app is resilient to administrative node drainage",
+    "description": "Can my app maintain minimum specified resources?",
+    "tags": [
+      "service",
+      "kubernetes"
+    ],
+    "steady-state-hypothesis": {
+      "title": "Services available and healthy",
+      "probes": [
+        {
+          "type": "probe",
+          "name": "application-must-respond-normally",
+          "tolerance": 200,
+          "provider": {
+            "type": "http",
+            "url": "http://http://35.147.81.231/",
+            "timeout": 3
+          }
+        },
+        {
+          "type": "probe",
+          "name": "pods_in_phase",
+          "tolerance": true,
+          "provider": {
+            "type": "python",
+            "module": "chaosk8s.pod.probes",
+            "func": "pods_in_phase",
+            "arguments": {
+              "label_selector": "biz-app-id=retail",
+              "phase": "Running",
+              "ns": "default"
+            }
+          }
+        }
+      ]
+    },
+    "method": [
+      {
+        "type": "action",
+        "name": "drain_node",
+        "provider": {
+          "type": "python",
+          "module": "chaosk8s.node.actions",
+          "func": "drain_nodes",
+          "arguments": {
+            "name": "gke-disruption-demo-default-pool-9fa7a856-jrvm",
+            "delete_pods_with_local_storage": true
+          }
+        }
+      }
+    ],
+    "rollbacks": [
+      {
+        "type": "action",
+        "name": "uncordon_node",
+        "provider": {
+          "type": "python",
+          "module": "chaosk8s.node.actions",
+          "func": "uncordon_node",
+          "arguments": {
+            "name": "gke-disruption-demo-default-pool-9fa7a856-jrvm"
+          }
+        }
+      }
+    ],
+    "dry": null
+  },
+  "start": "2023-10-20T02:54:11.178662",
+  "status": "failed",
+  "deviated": false,
+  "steady_states": {
+    "before": {
+      "steady_state_met": false,
+      "probes": [
+        {
+          "activity": {
+            "type": "probe",
+            "name": "application-must-respond-normally",
+            "tolerance": 200,
+            "provider": {
+              "type": "http",
+              "url": "http://http://35.147.81.231/",
+              "timeout": 3
+            }
+          },
+          "output": null,
+          "start": "2023-10-20T02:54:11.180673",
+          "status": "failed",
+          "exception": [
+            "Traceback (most recent call last):\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\urllib3\\connection.py\", line 174, in _new_conn\n    conn = connection.create_connection(\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\urllib3\\util\\connection.py\", line 72, in create_connection\n    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\socket.py\", line 955, in getaddrinfo\n    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):\n",
+            "socket.gaierror: [Errno 11001] getaddrinfo failed\n",
+            "\nDuring handling of the above exception, another exception occurred:\n\n",
+            "Traceback (most recent call last):\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\urllib3\\connectionpool.py\", line 715, in urlopen\n    httplib_response = self._make_request(\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\urllib3\\connectionpool.py\", line 416, in _make_request\n    conn.request(method, url, **httplib_request_kw)\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\urllib3\\connection.py\", line 244, in request\n    super(HTTPConnection, self).request(method, url, body=body, headers=headers)\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\http\\client.py\", line 1282, in request\n    self._send_request(method, url, body, headers, encode_chunked)\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\http\\client.py\", line 1328, in _send_request\n    self.endheaders(body, encode_chunked=encode_chunked)\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\http\\client.py\", line 1277, in endheaders\n    self._send_output(message_body, encode_chunked=encode_chunked)\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\http\\client.py\", line 1037, in _send_output\n    self.send(msg)\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\http\\client.py\", line 975, in send\n    self.connect()\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\urllib3\\connection.py\", line 205, in connect\n    conn = self._new_conn()\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\urllib3\\connection.py\", line 186, in _new_conn\n    raise NewConnectionError(\n",
+            "urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x000002353D7AD180>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed\n",
+            "\nDuring handling of the above exception, another exception occurred:\n\n",
+            "Traceback (most recent call last):\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\requests\\adapters.py\", line 486, in send\n    resp = conn.urlopen(\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\urllib3\\connectionpool.py\", line 799, in urlopen\n    retries = retries.increment(\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\urllib3\\util\\retry.py\", line 592, in increment\n    raise MaxRetryError(_pool, url, error or ResponseError(cause))\n",
+            "urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='http', port=80): Max retries exceeded with url: //35.147.81.231/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002353D7AD180>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))\n",
+            "\nDuring handling of the above exception, another exception occurred:\n\n",
+            "Traceback (most recent call last):\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\chaoslib\\provider\\http.py\", line 50, in run_http_activity\n    r = s.get(\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\requests\\sessions.py\", line 602, in get\n    return self.request(\"GET\", url, **kwargs)\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\requests\\sessions.py\", line 589, in request\n    resp = self.send(prep, **send_kwargs)\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\requests\\sessions.py\", line 703, in send\n    r = adapter.send(request, **kwargs)\n",
+            "  File \"C:\\Users\\blina\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\requests\\adapters.py\", line 519, in send\n    raise ConnectionError(e, request=request)\n",
+            "requests.exceptions.ConnectionError: HTTPConnectionPool(host='http', port=80): Max retries exceeded with url: //35.147.81.231/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002353D7AD180>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))\n",
+            "\nDuring handling of the above exception, another exception occurred:\n\n",
+            "chaoslib.exceptions.ActivityFailed: failed to connect to http://http://35.147.81.231/: HTTPConnectionPool(host='http', port=80): Max retries exceeded with url: //35.147.81.231/ (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002353D7AD180>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed'))\n"
+          ],
+          "end": "2023-10-20T02:54:13.474879",
+          "duration": 2.294206,
+          "tolerance_met": false
+        }
+      ]
+    },
+    "after": null,
+    "during": []
+  },
+  "run": [],
+  "rollbacks": [],
+  "end": "2023-10-20T02:54:13.476867",
+  "duration": 2.2982048988342285
+}
