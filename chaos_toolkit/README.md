@@ -1,4 +1,5 @@
-# Chaos Toolkit Demonstration
+# Chaos Toolkit Demonstration 
+by Bryan CECS 574 Fall 2023
 # Files
 - Dockerfile.txt: contains the settings for the kubernetes pods. Denotes app.py and which port to use
 - app.py: the main service code you would be running
